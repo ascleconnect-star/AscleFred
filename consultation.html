@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<title>Consultation Room · Ascle</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+<!-- ─── SUPABASE SDK ─── -->
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- ─── DAILY.CO PREBUILT SDK ─── -->
+<script crossorigin="anonymous" src="https://unpkg.com/@daily-co/daily-js"></script>
+
+<style>
+:root{
+  --ink:#0A0F0C;--ink2:#111A14;--ink3:#1C2B22;
+  --sage:#2E5D45;--emerald:#1A9B5F;--mint:#3DD68C;
+  --cream:#F5F0E8;--parchment:#EDE8DC;
+  --gold:#C5A84B;--gold2:#E8C96A;
+  --red:#C0392B;--muted:#8A9E8E;--muted2:#5C7361;
+  --white:#FFFFFF;
+  --r8:8px;--r12:12px;--r16:16px;--r24:24px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Outfit',sans-serif;background:var(--ink);color:var(--cream);
+  min-height:100dvh;display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top);
+}
+
+/* ── TOP BAR ─────────────────────────────────────── */
+.consult-topbar{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;background:rgba(10,15,12,0.92);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(61,214,140,0.08);
+}
+.ctb-brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.ctb-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--mint),var(--sage));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--ink);font-family:'Cormorant Garamond',serif}
+.ctb-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;color:var(--white)}
+.ctb-back{color:var(--muted);font-size:13px;text-decoration:none;border:1px solid rgba(255,255,255,0.12);padding:7px 14px;border-radius:var(--r8);transition:all .2s}
+.ctb-back:hover{color:var(--mint);border-color:var(--mint)}
+
+/* ── MAIN ────────────────────────────────────────── */
+.consult-main{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px 16px 32px;gap:18px;width:100%}
+.consult-card{width:100%;max-width:760px}
+
+.status-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.status-pill{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:.2px}
+.status-scheduled{background:rgba(197,168,75,0.14);color:var(--gold2)}
+.status-active{background:rgba(61,214,140,0.14);color:var(--mint)}
+.status-completed{background:rgba(255,255,255,0.08);color:var(--muted)}
+.status-cancelled{background:rgba(192,57,43,0.14);color:#E8837A}
+.status-dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.status-active .status-dot{animation:pulse-dot 1.6s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.35}}
+
+.consult-meta{font-size:13px;color:var(--muted)}
+
+/* Participant summary */
+.party-panel{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  background:var(--ink2);border:1px solid rgba(255,255,255,0.06);
+  border-radius:var(--r16);padding:16px 18px;margin-bottom:16px;
+}
+.party{display:flex;align-items:center;gap:10px}
+.party-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--mint),var(--emerald));display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--ink);font-size:14px;flex-shrink:0}
+.party-name{font-size:14px;font-weight:600;color:var(--white)}
+.party-role{font-size:11px;color:var(--muted)}
+.party-sep{color:var(--muted2);font-size:18px}
+
+/* Video stage */
+.video-stage{
+  position:relative;width:100%;aspect-ratio:16/10;
+  background:var(--ink3);border-radius:var(--r16);overflow:hidden;
+  border:1px solid rgba(61,214,140,0.14);
+  box-shadow:0 20px 50px rgba(0,0,0,0.35);
+}
+@media (max-width:640px){.video-stage{aspect-ratio:9/13}}
+#video-container{position:absolute;inset:0;width:100%;height:100%}
+#video-container iframe{width:100%;height:100%;border:0}
+
+.video-placeholder{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;text-align:center;padding:24px;
+}
+.vp-icon{font-size:40px}
+.vp-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--white)}
+.vp-sub{font-size:13.5px;color:var(--muted);max-width:340px;line-height:1.5}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:var(--r12);font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;transition:all .25s;text-decoration:none}
+.btn-primary{background:linear-gradient(135deg,var(--mint),var(--emerald));color:var(--ink);padding:13px 30px;font-size:14.5px}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(61,214,140,0.3)}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-outline{background:none;border:1.5px solid rgba(255,255,255,0.2);color:var(--cream);padding:13px 30px;font-size:14.5px}
+.btn-outline:hover{border-color:var(--mint);color:var(--mint)}
+.btn-danger{background:rgba(192,57,43,0.14);color:#E8837A;border:1.5px solid rgba(192,57,43,0.3);padding:11px 22px;font-size:13.5px}
+.btn-danger:hover{background:rgba(192,57,43,0.22)}
+
+.action-row{display:flex;gap:12px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+
+.inline-error{
+  background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.25);color:#E8837A;
+  padding:12px 16px;border-radius:var(--r12);font-size:13px;margin-top:14px;display:none;
+}
+</style>
+</head>
+<body>
+
+<div class="consult-topbar">
+  <a class="ctb-brand" href="/">
+    <div class="ctb-mark">A</div>
+    <div class="ctb-name">Ascle</div>
+  </a>
+  <a class="ctb-back" href="/">← Back to dashboard</a>
+</div>
+
+<main class="consult-main">
+  <div class="consult-card">
+
+    <div class="status-row">
+      <span class="status-pill" id="status-pill">
+        <span class="status-dot"></span><span id="status-label">Loading…</span>
+      </span>
+      <span class="consult-meta" id="consult-meta">—</span>
+    </div>
+
+    <div class="party-panel">
+      <div class="party">
+        <div class="party-av" id="patient-av">P</div>
+        <div>
+          <div class="party-name" id="patient-name">Patient</div>
+          <div class="party-role">Patient</div>
+        </div>
+      </div>
+      <span class="party-sep">↔</span>
+      <div class="party">
+        <div>
+          <div class="party-name" id="practitioner-name" style="text-align:right">Practitioner</div>
+          <div class="party-role" style="text-align:right" id="practitioner-role">Doctor</div>
+        </div>
+        <div class="party-av" id="practitioner-av">D</div>
+      </div>
+    </div>
+
+    <div class="video-stage">
+      <div id="video-container"></div>
+      <div class="video-placeholder" id="video-placeholder">
+        <div class="vp-icon">🩺</div>
+        <div class="vp-title" id="vp-title">Preparing your consultation…</div>
+        <div class="vp-sub" id="vp-sub">Hold on while we check your session.</div>
+      </div>
+    </div>
+
+    <div class="action-row" id="action-row"></div>
+    <div class="inline-error" id="inline-error"></div>
+  </div>
+</main>
+
+<script src="/consultation.js"></script>
+</body>
+</html>

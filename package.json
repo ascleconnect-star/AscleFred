@@ -1,0 +1,9 @@
+{
+  "name": "ascle-teleconsult",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ascle on-demand teleconsultation room — Netlify functions + Supabase + Daily.co",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  }
+}

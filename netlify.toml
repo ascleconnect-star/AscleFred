@@ -1,0 +1,17 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+  command = "npm install"
+
+[functions]
+  node_bundler = "esbuild"
+
+[functions."create-room"]
+  # Netlify's Node 18+ runtime ships a global fetch, so no extra
+  # HTTP client dependency is needed inside the function.
+  external_node_modules = ["@supabase/supabase-js"]
+
+[[redirects]]
+  from = "/consult/*"
+  to = "/consultation.html"
+  status = 200
