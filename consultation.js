@@ -6,8 +6,8 @@
 // ══════════════════════════════════════════════════════
 //  CONFIG — same project as the rest of the Ascle app
 // ══════════════════════════════════════════════════════
-const SUPABASE_URL  = 'YOUR_PROJECT.supabase.co';   // ← paste from Supabase Dashboard → Project Settings → API
-const SUPABASE_ANON = 'YOUR_ANON_PUBLIC_KEY';        // ← paste from Supabase Dashboard → Project Settings → API
+const SUPABASE_URL  = 'https://njhijrmfoeemowrcraus.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qaGlqcm1mb2VlbW93cmNyYXVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxMDA5MTMsImV4cCI6MjA5ODY3NjkxM30.v3w_OB3yGdaPt6ELnHQ1fd4jSv3dMsHG-MI580xC6XY';
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
